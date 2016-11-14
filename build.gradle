@@ -14,7 +14,7 @@ tasks.withType(JavaCompile) {
 
 ext {
     junit = "4.11"
-    swagger2markup = "1.0.0"
+    swagger2markup = "1.1.0"
 }
 
 repositories {
