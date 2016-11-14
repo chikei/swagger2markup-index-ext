@@ -1,5 +1,5 @@
 group 'io.github.chikei'
-version '1.0-SNAPSHOT'
+version '1.0.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply from: 'gradle/publish.gradle'
