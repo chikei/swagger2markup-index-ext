@@ -1,28 +1,25 @@
 package io.github.chikei.index;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Ordering;
 import io.github.swagger2markup.Swagger2MarkupConverter;
 import io.github.swagger2markup.markup.builder.MarkupDocBuilder;
 import io.github.swagger2markup.markup.builder.MarkupLanguage;
 import io.github.swagger2markup.markup.builder.MarkupTableColumn;
 import io.github.swagger2markup.model.PathOperation;
-import io.github.swagger2markup.spi.OverviewDocumentExtension;
+import io.github.swagger2markup.spi.PathsDocumentExtension;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
-import org.apache.commons.collections4.MapUtils;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class IndexExtension extends OverviewDocumentExtension {
+public class IndexExtension extends PathsDocumentExtension {
     private static final String EXTENSION_ID = "pathIndex";
     private Swagger model = null;
 
-    static final Ordering<HttpMethod> OPERATION_METHOD_NATURAL_ORDERING = Ordering
+    private static final Ordering<HttpMethod> OPERATION_METHOD_NATURAL_ORDERING = Ordering
             .explicit(HttpMethod.POST, HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH, HttpMethod.HEAD, HttpMethod.OPTIONS);
 
     @Override
@@ -35,8 +32,8 @@ public class IndexExtension extends OverviewDocumentExtension {
         MarkupDocBuilder builder = context.getMarkupDocBuilder();
         Position position = context.getPosition();
 
-        if (position.equals(Position.DOCUMENT_END)) {
-            builder.sectionTitleLevel1("Path Index");
+        if (position.equals(Position.DOCUMENT_BEGIN)) {
+            builder.sectionTitleLevel2("Path Index");
             buildTable(builder, operations(model), getPathOperations(model));
         }
     }
