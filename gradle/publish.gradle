@@ -1,4 +1,5 @@
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -15,44 +16,52 @@ artifacts {
     archives javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            pom.withXml {
-                def root = asNode()
+signing {
+    sign configurations.archives
+}
 
-                root.dependencies.'*'.findAll() {
-                    it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
-                        dep.name == it.artifactId.text()
-                    }
-                }.each() {
-                    it.scope*.value = 'compile'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description 'A Swagger to Markup extension generates path index'
+                url 'https://github.com/chikei/swagger2markup-index-ext'
+
+                scm {
+                    connection 'scm:git:git://github.com/chikei/swagger2markup-index-ext.git'
+                    developerConnection 'scm:git:ssh://github.com:chikei/swagger2markup-index-ext.git'
+                    url 'https://github.com/chikei/swagger2markup-index-ext.git'
                 }
 
-                root.appendNode('name', project.name)
-                root.appendNode('packaging', 'jar')
-                root.appendNode('url', 'https://github.com/chikei/swagger2markup-index-ext')
-                root.appendNode('description', 'A Swagger to Markup extension generates path index')
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
 
-                def license = root.appendNode('licenses').appendNode('license')
-                license.appendNode('name', 'The Apache Software License, Version 2.0')
-                license.appendNode('url', 'http://www.apache.org/license/LICENSE-2.0.txt')
-                license.appendNode('distribution', 'repo')
-
-                def developer = root.appendNode('developers').appendNode('developer')
-                developer.appendNode('id', 'Chikei')
-                developer.appendNode('name', 'TzeKei Lee')
-                developer.appendNode('email', 'chikei@gmail.com')
-                developer.appendNode('organizationUrl', 'https://github.com/chikei')
-
-                def scm = root.appendNode('scm')
-                scm.appendNode('url', 'https://github.com/chikei/swagger2markup-index-ext.git')
-                scm.appendNode('connection', 'scm:git:git://github.com/chikei/swagger2markup-index-ext.git')
-                scm.appendNode('developerConnection', 'scm:git:ssh://github.com:chikei/swagger2markup-index-ext.git')
+                developers {
+                    developer {
+                        id 'Chikei'
+                        name 'TzeKei Lee'
+                        email 'chikei@gmail.com'
+                        organizationUrl 'https://github.com/chikei'
+                    }
+                }
             }
-            artifact sourcesJar
-            artifact javadocJar
         }
     }
 }
